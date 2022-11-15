@@ -62,3 +62,5 @@ const BookingModal = ({ treatment, selectedDate, setTreatment }) => {
 };
 
 export default BookingModal;
+
+
