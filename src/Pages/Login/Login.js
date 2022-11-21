@@ -1,12 +1,43 @@
 
+import { useContext, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../contexts/AuthProvider';
+import useToken from '../../hooks/useToken';
 
 const Login = () => {
     const { register, formState: { errors }, handleSubmit } = useForm();
+
+    const { signIn } = useContext(AuthContext);
+    const [logInError, setLogInError] = useState('');
+    const [loginUserEmail, setLoginUserEmail] = useState('');
+    const token = useToken(loginUserEmail);
+    const location = useLocation();
+    const navigate = useNavigate();
+
+
+    const from = location.state?.from?.pathname || '/';
+
+    if (token) {
+        navigate(from, { replace: true });
+    }
+
+
     const handleLogin = data => {
         console.log(data);
         // console.log(errors);
+        setLogInError('');
+        signIn(data.email, data.password)
+            .then(result => {
+                const user = result.user;
+                console.log(user);
+                setLoginUserEmail(data.email);
+
+            })
+            .catch(error => {
+                console.error(error.message)
+                setLogInError(error.message);
+            });
     }
     return (
         <div className='h-[800px] flex justify-center items-center'>
@@ -34,6 +65,9 @@ const Login = () => {
                         <label className="label"> <span className="label-text">Forget Password</span> </label>
                     </div>
                     <input className='btn btn-accent w-full' value="Login" type="submit" />
+                    <div>
+                        {logInError && <p className='text-red-600'>{logInError}</p>}
+                    </div>
                 </form>
                 <p>New to doctors portal <Link to="/signup" className='text-secondary'>Create New Account</Link></p>
                 <div className="divider">OR</div>
